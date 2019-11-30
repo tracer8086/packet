@@ -19,10 +19,10 @@ type Packet struct {
 	Data   []byte
 }
 
-// New creates a new packet.
+// NewPacket creates a new packet.
 // It expects a byteCode for the type of message and
 // a data parameter in the form of a byte slice.
-func New(byteCode byte, data []byte) *Packet {
+func NewPacket(byteCode byte, data []byte) *Packet {
 	return &Packet{
 		Type:   byteCode,
 		Length: int64(len(data)),

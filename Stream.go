@@ -114,7 +114,7 @@ func (stream *Stream) read(connection net.Conn) {
 			}
 		}
 
-		stream.in <- New(typeBuffer[0], data)
+		stream.in <- NewPacket(typeBuffer[0], data)
 	}
 }
 

@@ -58,7 +58,7 @@ func startServer(t *testing.T, port int) net.Listener {
 			go func() {
 				for msg := range client.Incoming {
 					assert.Equal(t, "ping", string(msg.Data))
-					client.Outgoing <- packet.New(0, []byte("pong"))
+					client.Outgoing <- packet.NewPacket(0, []byte("pong"))
 				}
 			}()
 		}
@@ -81,7 +81,7 @@ func TestCommunication(t *testing.T) {
 	assert.Nil(t, err)
 
 	// Send message
-	client.Outgoing <- packet.New(0, []byte("ping"))
+	client.Outgoing <- packet.NewPacket(0, []byte("ping"))
 
 	// Receive message
 	msg := <-client.Incoming
@@ -93,7 +93,7 @@ func TestCommunication(t *testing.T) {
 	conn.Close()
 
 	// Send packet (will be buffered until reconnect finishes)
-	client.Outgoing <- packet.New(0, []byte("ping"))
+	client.Outgoing <- packet.NewPacket(0, []byte("ping"))
 
 	// Reconnect
 	conn, err = net.Dial("tcp", "localhost:7000")
@@ -141,7 +141,7 @@ func TestDisconnect(t *testing.T) {
 			go func() {
 				for msg := range client.Incoming {
 					assert.Equal(t, "ping", string(msg.Data))
-					client.Outgoing <- packet.New(0, []byte("pong"))
+					client.Outgoing <- packet.NewPacket(0, []byte("pong"))
 				}
 			}()
 		}
@@ -158,7 +158,7 @@ func TestDisconnect(t *testing.T) {
 	defer client.Close()
 
 	// Send message
-	client.Outgoing <- packet.New(0, []byte("ping"))
+	client.Outgoing <- packet.NewPacket(0, []byte("ping"))
 
 	// Receive message
 	msg := <-client.Incoming
@@ -168,7 +168,7 @@ func TestDisconnect(t *testing.T) {
 }
 
 func TestUtils(t *testing.T) {
-	ping := packet.New(0, []byte("ping"))
+	ping := packet.NewPacket(0, []byte("ping"))
 	assert.Equal(t, len(ping.Bytes()), 1+8+4)
 
 	length, err := packet.Int64FromBytes(packet.Int64ToBytes(ping.Length))
@@ -206,7 +206,7 @@ func TestWriteTimeout(t *testing.T) {
 	// Send message
 	err = conn.SetWriteDeadline(time.Now())
 	assert.Nil(t, err)
-	client.Outgoing <- packet.New(0, []byte("ping"))
+	client.Outgoing <- packet.NewPacket(0, []byte("ping"))
 }
 
 func TestReadError(t *testing.T) {
@@ -231,7 +231,7 @@ func TestReadError(t *testing.T) {
 		assert.Nil(t, err)
 
 		// Send message
-		client.Outgoing <- packet.New(0, []byte("ping"))
+		client.Outgoing <- packet.NewPacket(0, []byte("ping"))
 
 		// err = conn.Close()
 		// assert.Nil(t, err)
@@ -248,7 +248,7 @@ func TestReadError(t *testing.T) {
 	defer client.Close()
 
 	// Send message
-	client.Outgoing <- packet.New(0, []byte("ping"))
+	client.Outgoing <- packet.NewPacket(0, []byte("ping"))
 
 	// Receive message
 	msg := <-client.Incoming
