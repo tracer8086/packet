@@ -169,9 +169,13 @@ func TestDisconnect(t *testing.T) {
 
 func TestUtils(t *testing.T) {
 	ping := packet.NewPacket(0, []byte("ping"))
-	assert.Equal(t, len(ping.Bytes()), 1+8+4)
+	bytes, err := ping.Bytes()
+	assert.Nil(t, err)
+	assert.Equal(t, len(bytes), 4+8+4)
 
-	length, err := packet.Int64FromBytes(packet.Int64ToBytes(ping.Length))
+	bytes, err = packet.Int64ToBytes(ping.Length)
+	assert.Nil(t, err)
+	length, err := packet.Int64FromBytes(bytes)
 	assert.Nil(t, err)
 	assert.Equal(t, ping.Length, length)
 }
