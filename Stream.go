@@ -82,11 +82,13 @@ func (stream *Stream) read(connection net.Conn) {
 		stream.closeWriter <- struct{}{}
 	}()
 
-	var length int64
-	typeBuffer := make([]byte, 1)
+	var (
+		length int64
+		typ    int32
+	)
 
 	for {
-		_, err := connection.Read(typeBuffer)
+		err := binary.Read(connection, binary.BigEndian, &typ)
 
 		if err != nil {
 			stream.onError(IOError{connection, err})
@@ -114,7 +116,7 @@ func (stream *Stream) read(connection net.Conn) {
 			}
 		}
 
-		stream.in <- NewPacket(typeBuffer[0], data)
+		stream.in <- NewPacket(typ, data)
 	}
 }
 

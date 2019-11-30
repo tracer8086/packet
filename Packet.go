@@ -14,7 +14,7 @@ const sendBufferSize = 16384
 // It has a byte code indicating the type of the message
 // and a data payload in the form of a byte slice.
 type Packet struct {
-	Type   byte
+	Type   int32
 	Length int64
 	Data   []byte
 }
@@ -22,7 +22,7 @@ type Packet struct {
 // NewPacket creates a new packet.
 // It expects a byteCode for the type of message and
 // a data parameter in the form of a byte slice.
-func NewPacket(byteCode byte, data []byte) *Packet {
+func NewPacket(byteCode int32, data []byte) *Packet {
 	return &Packet{
 		Type:   byteCode,
 		Length: int64(len(data)),
@@ -32,7 +32,7 @@ func NewPacket(byteCode byte, data []byte) *Packet {
 
 // Write writes the packet to the IO device.
 func (packet *Packet) Write(writer io.Writer) error {
-	_, err := writer.Write([]byte{packet.Type})
+	err := binary.Write(writer, binary.BigEndian, packet.Type)
 
 	if err != nil {
 		return err
@@ -68,11 +68,23 @@ func (packet *Packet) Write(writer io.Writer) error {
 }
 
 // Bytes returns the raw byte slice serialization of the packet.
-func (packet *Packet) Bytes() []byte {
-	result := []byte{packet.Type}
+func (packet *Packet) Bytes() ([]byte, error) {
+	typ, err := Int32ToBytes(packet.Type)
 
-	result = append(result, Int64ToBytes(packet.Length)...)
+	if err != nil {
+		return nil, err
+	}
+
+	length, err := Int64ToBytes(packet.Length)
+
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]byte, 0)
+	result = append(result, typ...)
+	result = append(result, length...)
 	result = append(result, packet.Data...)
 
-	return result
+	return result, nil
 }
